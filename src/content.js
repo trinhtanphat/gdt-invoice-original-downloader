@@ -10,7 +10,7 @@
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/đ/g, 'd')
+    .replace(/\u0111/g, 'd')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -56,8 +56,10 @@
 
     for (const storage of [localStorage, sessionStorage]) {
       for (const key of TOKEN_KEYS) {
-        const token = cleanToken(storage.getItem(key));
-        if (token) return token;
+        try {
+          const token = cleanToken(storage.getItem(key));
+          if (token) return token;
+        } catch (_) {}
       }
     }
     return '';
@@ -143,7 +145,8 @@
         date,
         sellerTaxCode: extractTaxCode(sellerText)
       };
-    }).filter((item) => item.sample && item.symbol && item.number && item.sellerTaxCode);
+    }).filter((item) => item.sample && item.symbol && /^\d+$/.test(item.number)
+      && /^\d{10}(?:-\d{3})?$/.test(item.sellerTaxCode));
   }
 
   function preferredRoute() {
@@ -181,7 +184,6 @@
       try { detail = (await response.text()).slice(0, 240); } catch (_) {}
       lastError = new Error(`TCT ${response.status} (${route}) ${detail}`.trim());
 
-      if (response.status === 401 || response.status === 403) break;
     }
     throw lastError || new Error('Không tải được XML gốc từ TCT.');
   }
