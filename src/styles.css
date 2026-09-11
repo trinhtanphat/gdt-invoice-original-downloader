@@ -1,0 +1,38 @@
+#gdt-original-downloader {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483647;
+  width: 280px;
+  padding: 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0,0,0,.18);
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #222;
+}
+#gdt-original-downloader .gdt-title { font-weight: 700; margin-bottom: 10px; }
+#gdt-original-downloader .gdt-download {
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #1677ff;
+  color: #fff;
+  font-weight: 600;
+}
+#gdt-original-downloader .gdt-download:disabled { opacity: .6; cursor: wait; }
+#gdt-original-downloader .gdt-status {
+  margin-top: 9px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+#gdt-original-downloader .gdt-status[data-type="success"] { color: #237804; }
+#gdt-original-downloader .gdt-status[data-type="warn"] { color: #ad6800; }
+#gdt-original-downloader .gdt-status[data-type="error"] { color: #cf1322; }
+#gdt-original-downloader details { margin-top: 8px; color: #555; }
+#gdt-original-downloader summary { cursor: pointer; }
+#gdt-original-downloader p { margin: 6px 0 0; line-height: 1.35; }
