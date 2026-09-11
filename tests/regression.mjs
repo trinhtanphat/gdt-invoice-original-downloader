@@ -3,16 +3,24 @@ import assert from 'node:assert/strict';
 await import('../src/core.js');
 const G = globalThis.GDTOriginal;
 
+assert.equal(G.VERSION, '0.2.1');
 const headers = ['Ký hiệu mẫu số', 'Ký hiệu hóa đơn', 'Số hóa đơn', 'Ngày lập', 'Người bán'];
 assert.deepEqual(headers.map(G.normalize), [
   'ky hieu mau so', 'ky hieu hoa don', 'so hoa don', 'ngay lap', 'nguoi ban'
 ]);
 
 const invoice = {
-  sellerTaxCode: '0312345678', sample: '1', symbol: 'C26TAA', number: '12345'
+  sellerTaxCode: '0312345678', sample: '1', symbol: 'C26TAA', number: '12345', date: '11/09/2026'
 };
 assert.equal(G.invoiceKey(invoice), '0312345678|1|C26TAA|12345');
 assert.equal(G.invoiceParams(invoice).toString(), 'nbmst=0312345678&khhdon=C26TAA&shdon=12345&khmshdon=1');
+
+const response = (disposition) => ({ headers: new Headers({ 'content-disposition': disposition }) });
+assert.equal(G.responseFilename(response('attachment; filename="source.zip"'), invoice),
+  '0312345678_1_C26TAA_12345__source.zip');
+assert.equal(G.responseFilename(response("attachment; filename*=UTF-8'en'h%C3%B3a%20%C4%91%C6%A1n.zip"), invoice),
+  '0312345678_1_C26TAA_12345__hóa_đơn.zip');
+assert.doesNotThrow(() => G.responseFilename(response("attachment; filename*=UTF-8''bad%ZZ.zip"), invoice));
 
 const viettel = G.providerForUrl('https://business-sinvoice.viettel.vn/tracuuhoadon.html');
 assert.equal(viettel.label, 'Viettel S-Invoice');

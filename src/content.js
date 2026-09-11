@@ -138,20 +138,30 @@
       const url = `${API_ROOT}/${route}/invoices/export-xml?${G.invoiceParams(invoice)}`;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const response = await fetch(url, { method: 'GET', credentials: 'include', headers });
-      if (response.ok) return response;
-      let detail = '';
-      try { detail = (await response.text()).slice(0, 240); } catch (_) {}
-      lastError = new Error(`TCT ${response.status} (${route}) ${detail}`.trim());
+      if (response.ok) {
+        const blob = await response.blob();
+        try {
+          await G.archive.validateZipBlob(blob);
+          return { response, blob };
+        } catch (error) {
+          lastError = new Error(`TCT ${response.status} (${route}) ${error.message || String(error)}`);
+        }
+      } else {
+        let detail = '';
+        try { detail = (await response.text()).slice(0, 240); } catch (_) {}
+        lastError = new Error(`TCT ${response.status} (${route}) ${detail}`.trim());
+      }
       await G.sleep(120);
     }
     throw lastError || new Error('Không tải được gói gốc từ TCT.');
   }
 
   async function downloadOne(invoice, token) {
-    const response = await requestOriginal(invoice, token);
+    const { response, blob } = await requestOriginal(invoice, token);
     const filename = G.responseFilename(response, invoice);
-    const blob = await response.blob();
-    const result = await G.archive.saveOriginalAndExtract(blob, filename, { extract: extractionEnabled() });
+    const result = await G.archive.saveOriginalAndExtract(blob, filename, {
+      extract: extractionEnabled(), validated: true
+    });
     addSourceLinks(result.links);
     if (result.warning) console.warn('[GDT Original] ZIP warning:', result.warning);
     return result;

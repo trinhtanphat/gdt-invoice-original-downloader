@@ -1,21 +1,27 @@
 {
   "manifest_version": 3,
   "name": "GDT Invoice Original Downloader",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tải ZIP/XML gốc từ TCT, tách bản thể hiện có sẵn và hỗ trợ tải nhiều trang bằng phiên đăng nhập hiện tại.",
   "content_scripts": [
     {
-      "matches": ["https://hoadondientu.gdt.gov.vn/*"],
+      "matches": [
+        "https://hoadondientu.gdt.gov.vn/*"
+      ],
       "js": [
         "vendor/fflate-0.8.3.js",
         "src/core.js",
         "src/archive.js",
         "src/content.js"
       ],
-      "css": ["src/styles.css"],
+      "css": [
+        "src/styles.css"
+      ],
       "run_at": "document_idle",
       "world": "MAIN"
     }
   ],
-  "host_permissions": ["https://hoadondientu.gdt.gov.vn/*"]
+  "host_permissions": [
+    "https://hoadondientu.gdt.gov.vn/*"
+  ]
 }

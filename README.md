@@ -51,6 +51,8 @@ Mỗi dòng cần đọc được bốn khóa:
 
 Tool validate số hóa đơn và MST trước khi gọi API để giảm rủi ro lệch cột khi giao diện TCT thay đổi.
 
+Từ v0.2.1, response chỉ được tính là thành công sau khi ZIP được kiểm tra cấu trúc. Nếu route đầu trả HTML/JSON giả `200 OK`, extension sẽ thử route còn lại; dữ liệu không phải ZIP sẽ không bị lưu nhầm thành `.zip`. Tên file tải xuống cũng được prefix bằng khóa hóa đơn để tránh trùng tên giữa nhiều hóa đơn.
+
 ## Bản thể hiện và provider links
 
 ZIP TCT có thể chỉ có XML, hoặc có thêm PDF/HTML tùy nguồn hóa đơn. Extension không tự tạo PDF từ XML vì việc đó có thể làm sai mẫu/logo/font/bố cục của nhà cung cấp.

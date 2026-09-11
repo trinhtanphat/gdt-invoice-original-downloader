@@ -2,7 +2,7 @@
   'use strict';
 
   const G = globalThis.GDTOriginal = globalThis.GDTOriginal || {};
-  G.VERSION = '0.2.0';
+  G.VERSION = '0.2.1';
 
   G.normalize = (value = '') => String(value)
     .normalize('NFD')
@@ -162,11 +162,20 @@
 
   G.responseFilename = (response, invoice) => {
     const disposition = response.headers.get('content-disposition') || '';
-    const utf8 = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+    const utf8 = disposition.match(/filename\*=UTF-8'(?:[^']*)'([^;]+)/i);
     const basic = disposition.match(/filename="?([^";]+)"?/i);
-    const supplied = utf8?.[1] ? decodeURIComponent(utf8[1]) : basic?.[1];
-    if (supplied) return `${G.safeFilePart(supplied.replace(/\.zip$/i, ''))}.zip`;
+    let supplied = basic?.[1] || '';
+    if (utf8?.[1]) {
+      try { supplied = decodeURIComponent(utf8[1]); }
+      catch (_) { supplied = utf8[1]; }
+    }
+    const identity = G.safeFilePart([invoice.sellerTaxCode, invoice.sample, invoice.symbol, invoice.number]
+      .filter(Boolean).join('_'));
+    if (supplied) {
+      const stem = G.safeFilePart(supplied.replace(/\.zip$/i, ''));
+      return `${identity}__${stem}.zip`;
+    }
     const date = G.safeFilePart(invoice.date || 'no-date');
-    return `invoice_${G.safeFilePart(invoice.symbol)}_${G.safeFilePart(invoice.number)}_${date}.zip`;
+    return `${identity}_${date}.zip`;
   };
 })();
