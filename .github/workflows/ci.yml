@@ -14,6 +14,14 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax check
-        run: node --check .\src\content.js
+        shell: pwsh
+        run: |
+          node --check .\src\core.js
+          node --check .\src\archive.js
+          node --check .\src\content.js
       - name: Regression tests
         run: node .\tests\regression.mjs
+      - name: ZIP archive tests
+        run: node .\tests\archive.mjs
+      - name: UTF-8 encoding tests
+        run: node .\tests\encoding.mjs

@@ -1,22 +1,22 @@
-import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
-const sourceUrl = new URL('../src/content.js', import.meta.url);
-const src = fs.readFileSync(sourceUrl, 'utf8');
-assert.equal(src.includes('\uFFFD'), false, 'source contains Unicode replacement character');
+await import('../src/core.js');
+const G = globalThis.GDTOriginal;
 
-const start = src.indexOf("const normalize = (value = '') => value");
-const endMarker = "    .trim();";
-const end = src.indexOf(endMarker, start) + endMarker.length;
-assert.ok(start >= 0 && end > start, 'normalize function not found');
-const declaration = src.slice(start, end).replace('const normalize', 'globalThis.normalize');
-(0, eval)(declaration);
+const headers = ['Ký hiệu mẫu số', 'Ký hiệu hóa đơn', 'Số hóa đơn', 'Ngày lập', 'Người bán'];
+assert.deepEqual(headers.map(G.normalize), [
+  'ky hieu mau so', 'ky hieu hoa don', 'so hoa don', 'ngay lap', 'nguoi ban'
+]);
 
-const headers = ['Ký hiệu mẫu số', 'Ký hiệu hóa đơn', 'Số hóa đơn', 'Ngày lập', 'Người bán'].map(globalThis.normalize);
-assert.deepEqual(headers, ['ky hieu mau so', 'ky hieu hoa don', 'so hoa don', 'ngay lap', 'nguoi ban']);
-const findColumn = (patterns) => headers.findIndex((h) => patterns.some((p) => h.includes(p)));
-assert.deepEqual([
-  findColumn(['ky hieu mau so', 'mau so']), findColumn(['ky hieu hoa don']),
-  findColumn(['so hoa don']), findColumn(['ngay lap']), findColumn(['nguoi ban'])
-], [0, 1, 2, 3, 4]);
+const invoice = {
+  sellerTaxCode: '0312345678', sample: '1', symbol: 'C26TAA', number: '12345'
+};
+assert.equal(G.invoiceKey(invoice), '0312345678|1|C26TAA|12345');
+assert.equal(G.invoiceParams(invoice).toString(), 'nbmst=0312345678&khhdon=C26TAA&shdon=12345&khmshdon=1');
+
+const viettel = G.providerForUrl('https://business-sinvoice.viettel.vn/tracuuhoadon.html');
+assert.equal(viettel.label, 'Viettel S-Invoice');
+const links = G.extractSourceLinks('x https://portal.einvoice.fpt.com.vn/a y https://example.com/z');
+assert.equal(links.length, 2);
+assert.equal(links[0].label, 'FPT.eInvoice');
 console.log('Regression tests passed');

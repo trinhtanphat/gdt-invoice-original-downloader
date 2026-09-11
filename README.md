@@ -1,59 +1,98 @@
 # GDT Invoice Original Downloader
 
-Chrome/Edge extension chạy hoàn toàn local để tải gói XML/ZIP gốc của hóa đơn điện tử từ `hoadondientu.gdt.gov.vn` bằng chính phiên đăng nhập hiện tại.
+Chrome/Edge extension chạy hoàn toàn local để tải gói ZIP/XML gốc của hóa đơn điện tử từ `hoadondientu.gdt.gov.vn` bằng chính phiên đăng nhập hiện tại.
 
-## Vì sao cách này đúng hơn việc dựng template?
+## Mục tiêu
 
-Mỗi nhà cung cấp HĐĐT có thể có bản thể hiện/PDF riêng. Cổng TCT không cung cấp một template PDF chung để tái tạo chính xác mọi nhà cung cấp. Dữ liệu chuẩn để đối chiếu là XML/gói nguồn do hệ thống trả về.
+Không dựng lại template hóa đơn. Tool giữ nguyên gói nguồn TCT trả về, sau đó chỉ tách các file bản thể hiện đã có sẵn trong gói như PDF/HTML/XML.
 
-Tool gọi trực tiếp endpoint xuất XML của TCT:
+Nếu XML/HTML gốc chứa link tới hệ thống nhà cung cấp, extension nhận diện và hiển thị link đó để người dùng tự mở. Tool không đoán URL, không gọi API riêng của nhà cung cấp và không bypass đăng nhập/CAPTCHA.
 
-- `/api/query/invoices/export-xml`
-- `/api/sco-query/invoices/export-xml` cho hóa đơn từ máy tính tiền
+## Tính năng v0.2
 
-Vì vậy tool không tự vẽ hóa đơn và không giả lập template.
+- Tải ZIP gốc từ `/api/query/invoices/export-xml`.
+- Hỗ trợ hóa đơn máy tính tiền qua `/api/sco-query/invoices/export-xml`.
+- Tự fallback giữa hai route nếu route đầu không phù hợp.
+- Tải trang hiện tại hoặc tự chạy từ trang 1 đến trang cuối của bảng Ant Design.
+- Dedupe hóa đơn giữa các trang và có nút retry các hóa đơn lỗi.
+- Tùy chọn tách PDF/HTML/XML có sẵn trong ZIP, nhưng vẫn luôn giữ ZIP gốc.
+- Nhận diện link nguồn Viettel S-Invoice, VNPT Invoice, MISA meInvoice, FPT.eInvoice và các host khác nếu link thực sự có trong dữ liệu gốc.
+- Không gửi MST, token hay dữ liệu hóa đơn tới server bên thứ ba.
 
 ## Cài đặt
 
-1. Mở Chrome/Edge > Extensions.
-2. Bật **Developer mode**.
-3. Chọn **Load unpacked** và trỏ đến thư mục repo này.
-4. Đăng nhập `https://hoadondientu.gdt.gov.vn` theo cách bình thường.
-5. Mở trang tra cứu có bảng hóa đơn.
-6. Bấm **Tải XML gốc trang này** ở góc dưới phải.
+1. Tải ZIP từ GitHub Releases và giải nén.
+2. Mở `chrome://extensions` hoặc `edge://extensions`.
+3. Bật **Developer mode**.
+4. Chọn **Load unpacked** và trỏ tới thư mục vừa giải nén.
+5. Đăng nhập cổng HĐĐT TCT theo cách bình thường.
+6. Mở trang tra cứu có bảng hóa đơn.
 
-## Cách hoạt động
+Extension hiển thị panel **GDT Original** ở góc dưới phải.
 
-Extension đọc các dòng đang hiển thị và lấy:
+### Tải trang hiện tại
+
+Bấm **Tải trang hiện tại** để tải các hóa đơn đang hiển thị.
+
+### Tải tất cả trang
+
+Bấm **Tải tất cả trang**. Extension sẽ cố quay về trang 1, tải từng trang, chờ bảng đổi dữ liệu rồi đi tiếp đến khi nút Next bị disable.
+
+Nếu trình duyệt hỏi quyền tải nhiều file, cần chọn **Allow multiple downloads** để tách PDF/HTML/XML hoạt động đầy đủ.
+
+## Dữ liệu được dùng
+
+Mỗi dòng cần đọc được bốn khóa:
 
 - MST người bán (`nbmst`)
 - Ký hiệu mẫu số (`khmshdon`)
 - Ký hiệu hóa đơn (`khhdon`)
 - Số hóa đơn (`shdon`)
 
-Sau đó gọi endpoint TCT bằng cookie/token của phiên trình duyệt hiện tại và tải file trả về về máy. Tool thử cả route hóa đơn thường và máy tính tiền để tăng độ tương thích.
+Tool validate số hóa đơn và MST trước khi gọi API để giảm rủi ro lệch cột khi giao diện TCT thay đổi.
+
+## Bản thể hiện và provider links
+
+ZIP TCT có thể chỉ có XML, hoặc có thêm PDF/HTML tùy nguồn hóa đơn. Extension không tự tạo PDF từ XML vì việc đó có thể làm sai mẫu/logo/font/bố cục của nhà cung cấp.
+
+Khi trong XML/HTML có URL nguồn, extension chỉ hiển thị URL đó. Người dùng quyết định có mở hay không. `host_permissions` của extension vẫn chỉ giới hạn ở `hoadondientu.gdt.gov.vn`.
+
+## UTF-8 và font tiếng Việt
+
+- Toàn bộ source/config/docs dùng UTF-8 và có `.editorconfig` khóa `charset = utf-8`.
+- CI dùng `TextDecoder(..., { fatal: true })` để fail nếu file có byte UTF-8 không hợp lệ.
+- CI kiểm tra không có ký tự replacement `U+FFFD`.
+- UI dùng font hệ thống `Segoe UI`, `Arial`, `sans-serif`; extension không nhúng hay thay font của hóa đơn gốc.
+- PDF/HTML/XML tách từ ZIP được lưu nguyên byte, không re-encode nội dung.
 
 ## Bảo mật và giới hạn
 
-- Không gửi MST, token hay dữ liệu hóa đơn đến server bên thứ ba.
-- Không bypass CAPTCHA, không tự động đăng nhập và không lưu mật khẩu.
-- Chỉ hoạt động khi bạn đã đăng nhập hợp lệ vào cổng TCT.
-- Endpoint/giao diện của TCT có thể thay đổi; nếu field thay đổi cần cập nhật selector.
-- Tool giữ nguyên gói ZIP trả về từ TCT; không tự render lại template.
-- PDF/bản thể hiện đúng 100% giao diện của từng nhà cung cấp chỉ có thể đảm bảo khi gói nguồn hoặc nhà cung cấp có PDF/HTML/bản thể hiện tương ứng.
-- Khi tải nhiều hóa đơn, trình duyệt có thể hỏi quyền **Allow multiple downloads**.
+- Không lưu mật khẩu.
+- Không bypass CAPTCHA.
+- Không tự động đăng nhập.
+- Không gửi token/dữ liệu hóa đơn ra server trung gian.
+- Endpoint/giao diện TCT có thể thay đổi trong tương lai.
+- Link provider chỉ được phát hiện từ dữ liệu gốc; tool không cam kết provider cho phép truy cập link mà không có thông tin xác thực riêng.
 
 ## Phát triển và kiểm thử
 
-Không cần npm hay build step. Chạy:
+Không cần build step để chạy extension. Chạy test local:
 
 ```powershell
+node --check .\src\core.js
+node --check .\src\archive.js
 node --check .\src\content.js
 node .\tests\regression.mjs
+node .\tests\archive.mjs
+node .\tests\encoding.mjs
 ```
 
-CI trên GitHub chạy hai kiểm tra này cho mọi push vào `main` và pull request.
+GitHub Actions chạy cùng bộ test cho mọi push vào `main` và pull request.
+
+## Dependency
+
+Extension bundle `fflate 0.8.3` (MIT) trong `vendor/` để giải nén ZIP hoàn toàn local. Không tải JavaScript thực thi từ CDN.
 
 ## License
 
-MIT.
+MIT. Xem thêm license của dependency trong `vendor/fflate-LICENSE.txt`.

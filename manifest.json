@@ -1,12 +1,17 @@
 {
   "manifest_version": 3,
   "name": "GDT Invoice Original Downloader",
-  "version": "0.1.1",
-  "description": "Tải gói XML/ZIP gốc của hóa đơn điện tử từ cổng Tổng cục Thuế bằng chính phiên đăng nhập hiện tại.",
+  "version": "0.2.0",
+  "description": "Tải ZIP/XML gốc từ TCT, tách bản thể hiện có sẵn và hỗ trợ tải nhiều trang bằng phiên đăng nhập hiện tại.",
   "content_scripts": [
     {
       "matches": ["https://hoadondientu.gdt.gov.vn/*"],
-      "js": ["src/content.js"],
+      "js": [
+        "vendor/fflate-0.8.3.js",
+        "src/core.js",
+        "src/archive.js",
+        "src/content.js"
+      ],
       "css": ["src/styles.css"],
       "run_at": "document_idle",
       "world": "MAIN"

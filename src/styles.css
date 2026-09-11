@@ -3,36 +3,67 @@
   right: 18px;
   bottom: 18px;
   z-index: 2147483647;
-  width: 280px;
+  width: 320px;
+  box-sizing: border-box;
   padding: 14px;
   border: 1px solid #d9d9d9;
   border-radius: 10px;
   background: #fff;
   box-shadow: 0 8px 30px rgba(0,0,0,.18);
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   font-size: 13px;
+  line-height: 1.35;
   color: #222;
 }
-#gdt-original-downloader .gdt-title { font-weight: 700; margin-bottom: 10px; }
-#gdt-original-downloader .gdt-download {
+#gdt-original-downloader * { box-sizing: border-box; }
+#gdt-original-downloader .gdt-title {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+#gdt-original-downloader .gdt-title span { color: #666; font-weight: 500; }
+#gdt-original-downloader button {
   width: 100%;
+  margin-top: 6px;
   padding: 9px 12px;
   border: 0;
   border-radius: 6px;
   cursor: pointer;
   background: #1677ff;
   color: #fff;
+  font: inherit;
   font-weight: 600;
 }
-#gdt-original-downloader .gdt-download:disabled { opacity: .6; cursor: wait; }
+#gdt-original-downloader button.gdt-download-all { background: #0958d9; }
+#gdt-original-downloader button.gdt-retry { background: #d46b08; }
+#gdt-original-downloader button:disabled { opacity: .6; cursor: wait; }
+#gdt-original-downloader .gdt-option {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  margin-top: 10px;
+  color: #444;
+}
+#gdt-original-downloader .gdt-option input { margin-top: 2px; }
 #gdt-original-downloader .gdt-status {
   margin-top: 9px;
-  line-height: 1.35;
+  min-height: 18px;
   word-break: break-word;
 }
 #gdt-original-downloader .gdt-status[data-type="success"] { color: #237804; }
 #gdt-original-downloader .gdt-status[data-type="warn"] { color: #ad6800; }
 #gdt-original-downloader .gdt-status[data-type="error"] { color: #cf1322; }
+#gdt-original-downloader .gdt-links { margin-top: 8px; }
+#gdt-original-downloader .gdt-links-title { font-weight: 600; margin-bottom: 3px; }
+#gdt-original-downloader .gdt-links a {
+  display: block;
+  overflow: hidden;
+  margin-top: 3px;
+  color: #0958d9;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 #gdt-original-downloader details { margin-top: 8px; color: #555; }
 #gdt-original-downloader summary { cursor: pointer; }
-#gdt-original-downloader p { margin: 6px 0 0; line-height: 1.35; }
+#gdt-original-downloader p { margin: 6px 0 0; }
